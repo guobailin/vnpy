@@ -70,6 +70,16 @@ def sign(feature: DataProxy) -> DataProxy:
     return DataProxy(df)
 
 
+def cast_to_int(feature: DataProxy) -> DataProxy:
+    """Cast the feature data to integer type"""
+    df: pl.DataFrame = feature.df.select(
+        pl.col("datetime"),
+        pl.col("vt_symbol"),
+        pl.col("data").cast(pl.Int64)
+    )
+    return DataProxy(df)
+
+
 def quesval(threshold: float, feature1: DataProxy, feature2: DataProxy | float | int, feature3: DataProxy | float | int) -> DataProxy:
     """Return feature2 if threshold < feature1, otherwise feature3"""
     df_merged = feature1.df
@@ -163,5 +173,4 @@ def pow2(base: DataProxy, exponent: DataProxy) -> DataProxy:
     ).select(["datetime", "vt_symbol", "data"])
 
     return DataProxy(df)
-
 
