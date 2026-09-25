@@ -563,6 +563,7 @@ CTP 的实现全部在独立包 `vnpy_ctp` 中，本仓库只通过网关插件�
 | 11 | `OnRspUserLogout` |
 | 12 | `OnRtnDepthMarketData` |
 | 13 | `OnRtnForQuoteRsp` |
+
 ## 6. 官方 6.7.13 已声明、但 vnpy 未封装的接口
 
 CTP API 6.7.13 相比 6.7.11 新增了以下接口，包装层（仍为 6.7.11.4 代码）**没有提供 Python 绑定**，
@@ -582,9 +583,10 @@ CTP API 6.7.13 相比 6.7.11 新增了以下接口，包装层（仍为 6.7.11.4
 「构造 `CThostFtdcXxxField` → 调用 `this->api->ReqXxx` → pybind `.def("reqXxx", ...)`」的三段式，
 回调侧同理增加 `OnRspXxx`/`OnRtnXxx` 的 Python 分发。
 
-另有**一个参数未暴露**：6.7.13 把「评测版 / 生产版」合并为同一个库，由
-`CreateFtdcTraderApi(pszFlowPath, bIsProductionMode = true)` 的第二个参数选择；
-包装层只传了 flow path，因此**固定走生产模式**。连实盘与 SimNow 均正常，若要接穿透式评测环境需再改一处。
+**生产版 / 测评版开关是暴露的**：6.7.13 把「测评版」与「生产版」合并为同一个库，由
+`CreateFtdcTraderApi(pszFlowPath, bIsProductionMode)` 的第二个参数选择。`CtpGateway` 通过配置项
+**「柜台环境」**（`实盘` → `production_mode=True`，`测试` → `False`）透出该开关，并同样传给
+`CreateFtdcMdApi`。连实盘与 SimNow 均选「实盘」；`测试` 档用于配合测评版逻辑。
 
 ## 7. macOS 安装实录（本机已验证可用）
 
