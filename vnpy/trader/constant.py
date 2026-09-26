@@ -152,9 +152,16 @@ class Currency(Enum):
 class Interval(Enum):
     """
     Interval of bar data.
+
+    注意大小写：小写 m 表示分钟（1m=1分钟），大写 M 表示月（1M=月线），
+    大写 Q 表示季（1Q=季线）。
     """
     MINUTE = "1m"
+    MINUTE_5 = "5m"
+    MINUTE_15 = "15m"
     HOUR = "1h"
     DAILY = "d"
     WEEKLY = "w"
+    MONTHLY = "1M"
+    QUARTERLY = "1Q"
     TICK = "tick"
