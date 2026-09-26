@@ -472,7 +472,7 @@ class ChartCursor(QtCore.QObject):
 
         for plot_name, label in self._y_labels.items():
             if plot_name == self._plot_name:
-                label.setText(str(self._y))
+                label.setText(f"{self._y:.2f}")
                 label.show()
                 label.setPos(bottom_right.x(), self._y)
             else:
@@ -501,6 +501,12 @@ class ChartCursor(QtCore.QObject):
         for plot_name, plot in self._plots.items():
             plot_info_text: str = buf[plot]
             info: pg.TextItem = self._infos[plot_name]
+
+            # 空文本不显示，避免细条面板上残留空边框
+            if not plot_info_text:
+                info.hide()
+                continue
+
             info.setText(plot_info_text)
             info.show()
 

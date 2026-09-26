@@ -1,0 +1,119 @@
+--- /tmp/widget_before.py
++++ .venv/lib/python3.12/site-packages/vnpy_ctabacktester/ui/widget.py
+@@ -16,6 +16,7 @@
+ from vnpy.trader.ui.widget import BaseMonitor, BaseCell, DirectionCell, EnumCell
+ from vnpy.event import Event, EventEngine
+ from vnpy.chart import ChartWidget, CandleItem, VolumeItem
++from vnpy.chart.regime_item import IndicatorItem, RegimeItem
+ from vnpy.trader.utility import load_json, save_json
+ from vnpy.trader.object import BarData, TradeData, OrderData
+ from vnpy.trader.database import DB_TZ
+@@ -1232,65 +1233,25 @@
+         self.resize(1400, 800)
+ 
+         # Create chart widget
++        # 布局自上而下：状态柱带（细条） / K线 / ER·ADX 指标 / 成交量
+         self.chart: ChartWidget = ChartWidget()
++        self.chart.add_plot("regime", minimum_height=10, maximum_height=12, hide_x_axis=True)
++        # 柱带不显示数值刻度，但保留右轴占位：所有面板视图宽度一致，十字线才能对齐
++        # （若 hideAxis 隐藏右轴，柱带视图比其他面板宽 60px，x-link 的像素补偿在链式传播中会断链，导致竖线错位）
++        regime_axis = self.chart.get_plot("regime").getAxis("right")
++        regime_axis.setStyle(showValues=False)
+         self.chart.add_plot("candle", hide_x_axis=True)
++        self.chart.add_plot("indicator", maximum_height=140, hide_x_axis=True)
+         self.chart.add_plot("volume", maximum_height=200)
++        self.chart.add_item(RegimeItem, "regime", "regime")
+         self.chart.add_item(CandleItem, "candle", "candle")
++        self.chart.add_item(IndicatorItem, "indicator", "indicator")
+         self.chart.add_item(VolumeItem, "volume", "volume")
+         self.chart.add_cursor()
+ 
+-        # Create help widget
+-        text1: str = _("红色虚线 —— 盈利交易")
+-        label1: QtWidgets.QLabel = QtWidgets.QLabel(text1)
+-        label1.setStyleSheet("color:red")
+-
+-        text2: str = _("绿色虚线 —— 亏损交易")
+-        label2: QtWidgets.QLabel = QtWidgets.QLabel(text2)
+-        label2.setStyleSheet("color:#00FF00")
+-
+-        text3: str = _("黄色向上箭头 —— 买入开仓 Buy")
+-        label3: QtWidgets.QLabel = QtWidgets.QLabel(text3)
+-        label3.setStyleSheet("color:yellow")
+-
+-        text4: str = _("黄色向下箭头 —— 卖出平仓 Sell")
+-        label4: QtWidgets.QLabel = QtWidgets.QLabel(text4)
+-        label4.setStyleSheet("color:yellow")
+-
+-        text5: str = _("紫红向下箭头 —— 卖出开仓 Short")
+-        label5: QtWidgets.QLabel = QtWidgets.QLabel(text5)
+-        label5.setStyleSheet("color:magenta")
+-
+-        text6: str = _("紫红向上箭头 —— 买入平仓 Cover")
+-        label6: QtWidgets.QLabel = QtWidgets.QLabel(text6)
+-        label6.setStyleSheet("color:magenta")
+-
+-        hbox1: QtWidgets.QHBoxLayout = QtWidgets.QHBoxLayout()
+-        hbox1.addStretch()
+-        hbox1.addWidget(label1)
+-        hbox1.addStretch()
+-        hbox1.addWidget(label2)
+-        hbox1.addStretch()
+-
+-        hbox2: QtWidgets.QHBoxLayout = QtWidgets.QHBoxLayout()
+-        hbox2.addStretch()
+-        hbox2.addWidget(label3)
+-        hbox2.addStretch()
+-        hbox2.addWidget(label4)
+-        hbox2.addStretch()
+-
+-        hbox3: QtWidgets.QHBoxLayout = QtWidgets.QHBoxLayout()
+-        hbox3.addStretch()
+-        hbox3.addWidget(label5)
+-        hbox3.addStretch()
+-        hbox3.addWidget(label6)
+-        hbox3.addStretch()
+-
+-        # Set layout
++        # Set layout（图例靠颜色区分，不再占用底部空间）
+         vbox: QtWidgets.QVBoxLayout = QtWidgets.QVBoxLayout()
+         vbox.addWidget(self.chart)
+-        vbox.addLayout(hbox1)
+-        vbox.addLayout(hbox2)
+-        vbox.addLayout(hbox3)
+         self.setLayout(vbox)
+ 
+     def update_history(self, history: list) -> None:
+@@ -1338,7 +1299,7 @@
+             else:
+                 color = "g"
+ 
+-            pen: QtGui.QPen = pg.mkPen(color, width=1.5, style=QtCore.Qt.PenStyle.DashLine)
++            pen: QtGui.QPen = pg.mkPen(color, width=2.5, style=QtCore.Qt.PenStyle.DashLine)
+             item: pg.PlotCurveItem = pg.PlotCurveItem(x, y, pen=pen)
+ 
+             self.items.append(item)
+@@ -1365,9 +1326,10 @@
+                 open_y = open_bar.high_price
+                 close_y = close_bar.low_price
+ 
+-            pen = pg.mkPen(QtGui.QColor(scatter_color))
++            # 白边 + 放大一号，黑底上更醒目
++            pen = pg.mkPen("w", width=1)
+             brush: QtGui.QBrush = pg.mkBrush(QtGui.QColor(scatter_color))
+-            size: int = 10
++            size: int = 14
+ 
+             open_scatter: dict = {
+                 "pos": (open_ix, open_y - open_side * y_adjustment),
+@@ -1394,8 +1356,8 @@
+             open_text: pg.TextItem = pg.TextItem(f"[{volume}]", color=text_color, anchor=(0.5, 0.5))
+             close_text: pg.TextItem = pg.TextItem(f"[{volume}]", color=text_color, anchor=(0.5, 0.5))
+ 
+-            open_text.setPos(open_ix, open_y - open_side * y_adjustment * 3)
+-            close_text.setPos(close_ix, close_y - close_side * y_adjustment * 3)
++            open_text.setPos(open_ix, open_y - open_side * y_adjustment * 10)
++            close_text.setPos(close_ix, close_y - close_side * y_adjustment * 10)
+ 
+             self.items.append(open_text)
+             self.items.append(close_text)

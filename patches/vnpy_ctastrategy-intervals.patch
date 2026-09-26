@@ -1,0 +1,14 @@
+--- /tmp/origpkgs/extract_vnpy_ctastrategy/vnpy_ctastrategy/base.py	2020-02-02 00:00:00
++++ /Users/kellywang/code/vnpy/.venv/lib/python3.12/site-packages/vnpy_ctastrategy/base.py	2026-09-26 00:59:21
+@@ -53,6 +53,11 @@
+ INTERVAL_DELTA_MAP: dict[Interval, timedelta] = {
+     Interval.TICK: timedelta(milliseconds=1),
+     Interval.MINUTE: timedelta(minutes=1),
++    Interval.MINUTE_5: timedelta(minutes=5),
++    Interval.MINUTE_15: timedelta(minutes=15),
+     Interval.HOUR: timedelta(hours=1),
+     Interval.DAILY: timedelta(days=1),
++    Interval.WEEKLY: timedelta(weeks=1),
++    Interval.MONTHLY: timedelta(days=31),
++    Interval.QUARTERLY: timedelta(days=92),
+ }

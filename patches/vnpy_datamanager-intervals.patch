@@ -1,0 +1,51 @@
+--- /tmp/origpkgs/extract_vnpy_datamanager/vnpy_datamanager/ui/widget.py	2020-02-02 00:00:00
++++ /Users/kellywang/code/vnpy/.venv/lib/python3.12/site-packages/vnpy_datamanager/ui/widget.py	2026-09-26 00:59:12
+@@ -13,11 +13,28 @@
+ 
+ INTERVAL_NAME_MAP = {
+     Interval.MINUTE: "分钟线",
++    Interval.MINUTE_5: "5分钟线",
++    Interval.MINUTE_15: "15分钟线",
+     Interval.HOUR: "小时线",
+     Interval.DAILY: "日线",
++    Interval.WEEKLY: "周线",
++    Interval.MONTHLY: "月线",
++    Interval.QUARTERLY: "季线",
+ }
+ 
++# 数据树中周期节点的显示顺序
++INTERVAL_ORDER = [
++    Interval.MINUTE,
++    Interval.MINUTE_5,
++    Interval.MINUTE_15,
++    Interval.HOUR,
++    Interval.DAILY,
++    Interval.WEEKLY,
++    Interval.MONTHLY,
++    Interval.QUARTERLY,
++]
+ 
++
+ class ManagerWidget(QtWidgets.QWidget):
+     """"""
+ 
+@@ -117,12 +134,16 @@
+         overviews: list[BarOverview] = self.engine.get_bar_overview()
+         overviews.sort(key=lambda x: x.symbol)
+ 
+-        # 添加数据周期节点
+-        for interval in [Interval.MINUTE, Interval.HOUR, Interval.DAILY]:
++        # 添加数据周期节点（只为库中实际存在的周期建节点，按 INTERVAL_ORDER 排序）
++        present: set = {overview.interval for overview in overviews}
++        ordered: list = [i for i in INTERVAL_ORDER if i in present]
++        ordered += [i for i in present if i not in INTERVAL_ORDER]
++
++        for interval in ordered:
+             interval_child = QtWidgets.QTreeWidgetItem()
+             interval_childs[interval] = interval_child
+ 
+-            interval_name: str = INTERVAL_NAME_MAP[interval]
++            interval_name: str = INTERVAL_NAME_MAP.get(interval, interval.value)
+             interval_child.setText(0, interval_name)
+ 
+         # 遍历添加数据节点

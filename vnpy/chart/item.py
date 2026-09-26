@@ -242,21 +242,12 @@ class CandleItem(ChartItem):
             words: list = [
                 "Date",
                 bar.datetime.strftime("%Y-%m-%d"),
-                "",
                 "Time",
                 bar.datetime.strftime("%H:%M"),
-                "",
-                "Open",
-                str(bar.open_price),
-                "",
-                "High",
-                str(bar.high_price),
-                "",
-                "Low",
-                str(bar.low_price),
-                "",
-                "Close",
-                str(bar.close_price)
+                f"O {bar.open_price}",
+                f"H {bar.high_price}",
+                f"L {bar.low_price}",
+                f"C {bar.close_price}"
             ]
             text: str = "\n".join(words)
         else:
