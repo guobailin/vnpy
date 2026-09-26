@@ -42,3 +42,7 @@ _templates
 lab/
 /.mypy_cache
 .venv/
+
+# Data feed cache（tqsdk 原始 K 线，可重拉）
+datafeed/cache/
+datafeed/cache_old_naming/
